@@ -196,7 +196,24 @@ elseif(BUILD_ROCM)
     # 添加 HIP 源码（你需要将 csrc/ops.cu 和 csrc/kernels.cu 改成 HIP 兼容版本如 .hip 或 .cpp）
     list(APPEND SRC_FILES ${CUDA_FILES})
 
-    string(APPEND BNB_OUTPUT_NAME "_rocm")
+    # Convert the CUDA version from X.Y.z to XY. There's probably a shorter way of doing this
+    string(REGEX MATCH "^[0-9]+.[0-9]+" _CUDA_VERSION_FIRST_TWO "${CMAKE_CUDA_COMPILER_VERSION}")
+    string(REPLACE "." "" CUDA_VERSION_SHORT "${_CUDA_VERSION_FIRST_TWO}")
+
+    # Expose a cache variable that the user can set to ensure the correct version of CUDA is found
+    set(CUDA_VERSION "${CUDA_VERSION_SHORT}" CACHE STRING "Expected CUDA Version Shortcode")
+
+    message(STATUS "CUDA Version: ${CUDA_VERSION_SHORT} (${CMAKE_CUDA_COMPILER_VERSION})")
+    message(STATUS "CUDA Compiler: ${CMAKE_CUDA_COMPILER}")
+
+    # It should match the discovered version
+    if(NOT CUDA_VERSION STREQUAL "${CUDA_VERSION_SHORT}")
+        message(FATAL_ERROR "You've specified CUDA version ${CUDA_VERSION} however the CUDA compiler found is ${CUDA_VERSION_SHORT}."
+            " Ensure the desired CUDA compiler is the first one available on your PATH."
+        )
+    endif()
+
+    string(APPEND BNB_OUTPUT_NAME "_rocm${CUDA_VERSION_SHORT}")
     add_compile_definitions(BUILD_ROCM)
 
     set(ROCM_ARCH "gfx906" CACHE STRING "Target ROCm GPU architecture")
