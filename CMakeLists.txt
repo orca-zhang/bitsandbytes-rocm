@@ -189,6 +189,8 @@ elseif(BUILD_MPS)
 elseif(BUILD_ROCM)
     enable_language(HIP)
     find_package(HIP REQUIRED)
+    find_package(rocblas REQUIRED)
+    find_package(hiprand REQUIRED)
 
     # 添加 HIP 源码（你需要将 csrc/ops.cu 和 csrc/kernels.cu 改成 HIP 兼容版本如 .hip 或 .cpp）
     list(APPEND SRC_FILES ${CUDA_FILES})
@@ -236,7 +238,7 @@ if(BUILD_MPS)
 endif()
 if(BUILD_ROCM)
     target_include_directories(bitsandbytes PUBLIC ${HIP_INCLUDE_DIRS})
-    target_link_libraries(bitsandbytes PUBLIC hip::hipblas hip::hiprand hip::rocblas)
+    target_link_libraries(bitsandbytes PUBLIC roc::hipblas hip::hiprand roc::rocblas)
     set_target_properties(bitsandbytes PROPERTIES HIP_SEPARABLE_COMPILATION ON)
 endif()
 
