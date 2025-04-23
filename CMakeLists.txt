@@ -192,36 +192,39 @@ elseif(BUILD_ROCM)
     find_package(hipblas REQUIRED)
     find_package(rocblas REQUIRED)
     find_package(hiprand REQUIRED)
-
-    # 添加 HIP 源码（你需要将 csrc/ops.cu 和 csrc/kernels.cu 改成 HIP 兼容版本如 .hip 或 .cpp）
-    list(APPEND SRC_FILES ${CUDA_FILES})
-
-    # Convert the CUDA version from X.Y.z to XY. There's probably a shorter way of doing this
-    string(REGEX MATCH "^[0-9]+.[0-9]+" _CUDA_VERSION_FIRST_TWO "${CMAKE_CUDA_COMPILER_VERSION}")
-    string(REPLACE "." "" CUDA_VERSION_SHORT "${_CUDA_VERSION_FIRST_TWO}")
-
-    # Expose a cache variable that the user can set to ensure the correct version of CUDA is found
-    set(CUDA_VERSION "${CUDA_VERSION_SHORT}" CACHE STRING "Expected CUDA Version Shortcode")
-
-    message(STATUS "CUDA Version: ${CUDA_VERSION_SHORT} (${CMAKE_CUDA_COMPILER_VERSION})")
-    message(STATUS "CUDA Compiler: ${CMAKE_CUDA_COMPILER}")
-
-    # It should match the discovered version
-    if(NOT CUDA_VERSION STREQUAL "${CUDA_VERSION_SHORT}")
-        message(FATAL_ERROR "You've specified CUDA version ${CUDA_VERSION} however the CUDA compiler found is ${CUDA_VERSION_SHORT}."
-            " Ensure the desired CUDA compiler is the first one available on your PATH."
-        )
+    
+    # 检测 HIP Compiler（hipcc）版本
+    execute_process(
+        COMMAND ${HIP_HIPCC_EXECUTABLE} --version
+        OUTPUT_VARIABLE HIPCC_VERSION_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+    # 从 hipcc --version 提取版本号
+    string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" HIP_VERSION_FULL "${HIPCC_VERSION_OUTPUT}")
+    string(REGEX MATCH "^[0-9]+\\.[0-9]+" HIP_VERSION_FIRST_TWO "${HIP_VERSION_FULL}")
+    string(REPLACE "." "" HIP_VERSION_SHORT "${HIP_VERSION_FIRST_TWO}")
+    
+    # 显示 HIP 版本信息
+    message(STATUS "HIP Version: ${HIP_VERSION_SHORT} (${HIP_VERSION_FULL})")
+    message(STATUS "HIP Compiler: ${HIP_HIPCC_EXECUTABLE}")
+    
+    # 可选：允许用户指定目标版本，与检测版本对比
+    set(HIP_VERSION "${HIP_VERSION_SHORT}" CACHE STRING "Expected HIP Version Shortcode")
+    if(NOT HIP_VERSION STREQUAL "${HIP_VERSION_SHORT}")
+        message(FATAL_ERROR "You've specified HIP version ${HIP_VERSION} but detected version is ${HIP_VERSION_SHORT}.")
     endif()
-
-    set(ROCM_ARCH "gfx906" CACHE STRING "Target ROCm GPU architecture")
+    
+    # 设定 ROCm 架构等编译标志
+    set(ROCM_ARCH "gfx900;gfx902;gfx906;gfx908;gfx90a;gfx940;gfx941;gfx942;gfx1030;gfx1100;gfx1101" CACHE STRING "Target ROCm GPU architecture")
     set(HIP_HIPCC_FLAGS "${HIP_HIPCC_FLAGS} --amdgpu-target=${ROCM_ARCH} -O3 -ffast-math")
+    add_compile_definitions(BUILD_ROCM)
 
+    # 最终输出构建目标名称后缀
+    string(APPEND BNB_OUTPUT_NAME "_rocm${HIP_VERSION_SHORT}")
     message(STATUS "Using ROCm architecture: ${ROCM_ARCH}")
     message(STATUS "HIPCC Flags: ${HIP_HIPCC_FLAGS}")
-
-    string(APPEND BNB_OUTPUT_NAME "_rocm${CUDA_VERSION_SHORT}")
     message(STATUS "BNB_OUTPUT_NAME: ${BNB_OUTPUT_NAME}")
-    add_compile_definitions(BUILD_ROCM)
 else()
     string(APPEND BNB_OUTPUT_NAME "_cpu")
     set(GPU_SOURCES)
