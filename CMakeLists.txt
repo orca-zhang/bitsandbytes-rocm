@@ -199,7 +199,7 @@ elseif(BUILD_ROCM)
         OUTPUT_VARIABLE HIPCC_VERSION_OUTPUT
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    
+
     # 从 hipcc --version 提取版本号
     string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+" HIP_VERSION_FULL "${HIPCC_VERSION_OUTPUT}")
     string(REGEX MATCH "^[0-9]+\\.[0-9]+" HIP_VERSION_FIRST_TWO "${HIP_VERSION_FULL}")
@@ -217,8 +217,6 @@ elseif(BUILD_ROCM)
     # 最终输出构建目标名称后缀
     string(APPEND BNB_OUTPUT_NAME "_rocm${HIP_VERSION_SHORT}")
     message(STATUS "Using ROCm architecture: ${ROCM_ARCH}")
-    message(STATUS "HIPCC Flags: ${HIP_HIPCC_FLAGS}")
-    message(STATUS "BNB_OUTPUT_NAME: ${BNB_OUTPUT_NAME}")
 else()
     string(APPEND BNB_OUTPUT_NAME "_cpu")
     set(GPU_SOURCES)
