@@ -17,3 +17,11 @@ There are ongoing efforts to support further hardware backends, i.e. Intel CPU +
 `bitsandbytes` is MIT licensed.
 
 We thank Fabio Cannizzo for his work on [FastBinarySearch](https://github.com/fabiocannizzo/FastBinarySearch) which we use for CPU quantization.
+
+## Build for ROCm
+
+``` sh
+export PATH=/opt/rocm/bin:$PATH
+export CMAKE_PREFIX_PATH=/opt/rocm
+cmake -DCMAKE_CXX_COMPILER=hipcc -DCOMPUTE_BACKEND=rocm -B build . && cmake --build build
+```
