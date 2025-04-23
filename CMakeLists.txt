@@ -3,7 +3,7 @@
 #   For  GCC: `cmake -B build . && cmake --build build`
 #   For MSVC: `cmake -B build . && cmake --build build --config Release`
 # You can also use the following options and variables
-#  - COMPUTE_BACKEND: Set to `cpu`, `cuda`, or `mps` to select the backend
+#  - COMPUTE_BACKEND: Set to `cpu`, `cuda`, `mps`, or `rocm` to select the backend
 #  - CUDA_VERSION: The expected CUDA version, for sanity checking. The actual version
 #                  is whatever CMake finds on your path.
 #  - COMPUTE_CAPABILITY: Which GPU Arch/Compute codes to provide to NVCC.
@@ -201,7 +201,7 @@ elseif(BUILD_ROCM)
 
     message(STATUS "Using ROCm architecture: ${ROCM_ARCH}")
     message(STATUS "HIPCC Flags: ${HIP_HIPCC_FLAGS}")
-endif()
+else()
     string(APPEND BNB_OUTPUT_NAME "_cpu")
     set(GPU_SOURCES)
 endif()
