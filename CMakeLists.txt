@@ -189,6 +189,7 @@ elseif(BUILD_MPS)
 elseif(BUILD_ROCM)
     enable_language(HIP)
     find_package(HIP REQUIRED)
+    find_package(hipblas REQUIRED)
     find_package(rocblas REQUIRED)
     find_package(hiprand REQUIRED)
 
