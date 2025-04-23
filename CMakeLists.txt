@@ -213,14 +213,15 @@ elseif(BUILD_ROCM)
         )
     endif()
 
-    string(APPEND BNB_OUTPUT_NAME "_rocm${CUDA_VERSION_SHORT}")
-    add_compile_definitions(BUILD_ROCM)
-
     set(ROCM_ARCH "gfx906" CACHE STRING "Target ROCm GPU architecture")
     set(HIP_HIPCC_FLAGS "${HIP_HIPCC_FLAGS} --amdgpu-target=${ROCM_ARCH} -O3 -ffast-math")
 
     message(STATUS "Using ROCm architecture: ${ROCM_ARCH}")
     message(STATUS "HIPCC Flags: ${HIP_HIPCC_FLAGS}")
+
+    string(APPEND BNB_OUTPUT_NAME "_rocm${CUDA_VERSION_SHORT}")
+    message(STATUS "BNB_OUTPUT_NAME: ${BNB_OUTPUT_NAME}")
+    add_compile_definitions(BUILD_ROCM)
 else()
     string(APPEND BNB_OUTPUT_NAME "_cpu")
     set(GPU_SOURCES)
