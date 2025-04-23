@@ -209,12 +209,6 @@ elseif(BUILD_ROCM)
     message(STATUS "HIP Version: ${HIP_VERSION_SHORT} (${HIP_VERSION_FULL})")
     message(STATUS "HIP Compiler: ${HIP_HIPCC_EXECUTABLE}")
     
-    # 可选：允许用户指定目标版本，与检测版本对比
-    set(HIP_VERSION "${HIP_VERSION_SHORT}" CACHE STRING "Expected HIP Version Shortcode")
-    if(NOT HIP_VERSION STREQUAL "${HIP_VERSION_SHORT}")
-        message(FATAL_ERROR "You've specified HIP version ${HIP_VERSION} but detected version is ${HIP_VERSION_SHORT}.")
-    endif()
-    
     # 设定 ROCm 架构等编译标志
     set(ROCM_ARCH "gfx900;gfx902;gfx906;gfx908;gfx90a;gfx940;gfx941;gfx942;gfx1030;gfx1100;gfx1101" CACHE STRING "Target ROCm GPU architecture")
     set(HIP_HIPCC_FLAGS "${HIP_HIPCC_FLAGS} --amdgpu-target=${ROCM_ARCH} -O3 -ffast-math")
