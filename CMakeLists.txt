@@ -187,17 +187,25 @@ elseif(BUILD_MPS)
                 VERBATIM)
     add_custom_target(metallib DEPENDS "bitsandbytes/bitsandbytes.metallib")
 elseif(BUILD_ROCM)
-    enable_language(HIP)
-    find_package(HIP REQUIRED)
-
-    # 添加 HIP 源码（你需要将 csrc/ops.cu 和 csrc/kernels.cu 改成 HIP 兼容版本如 .hip 或 .cpp）
-    list(APPEND SRC_FILES ${CUDA_FILES})
-
-    string(APPEND BNB_OUTPUT_NAME "_rocm")
+    set(BNB_OUTPUT_NAME "${BNB_OUTPUT_NAME}_rocm")
     add_compile_definitions(BUILD_ROCM)
 
-    set(ROCM_ARCH "gfx1100" CACHE STRING "Target ROCm GPU architecture")
-    set(HIP_HIPCC_FLAGS "${HIP_HIPCC_FLAGS} --amdgpu-target=${ROCM_ARCH} -O3 -ffast-math")
+    # HIP 编译选项
+    add_compile_options(-O3 --amdgpu-target=gfx1100 -ffast-math)
+
+    # 添加 HIP 源码文件，建议你维护一套 .hip 或 .cpp 替代 .cu 文件
+    list(APPEND SRC_FILES ${CUDA_FILES})  # 如果是兼容写法
+
+    # 继续构建
+    add_library(bitsandbytes SHARED ${SRC_FILES})
+    target_compile_features(bitsandbytes PUBLIC cxx_std_14)
+    target_include_directories(bitsandbytes PUBLIC csrc include)
+
+    target_link_libraries(bitsandbytes PUBLIC amdhip64 rocblas hipblas)
+
+    # 输出路径配置
+    set_target_properties(bitsandbytes PROPERTIES OUTPUT_NAME ${BNB_OUTPUT_NAME})
+    set_target_properties(bitsandbytes PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bitsandbytes")
 
     message(STATUS "Using ROCm architecture: ${ROCM_ARCH}")
     message(STATUS "HIPCC Flags: ${HIP_HIPCC_FLAGS}")
