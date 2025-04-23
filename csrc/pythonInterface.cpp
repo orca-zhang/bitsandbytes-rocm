@@ -9,7 +9,7 @@
 #if BUILD_MPS
 // #include <mps_ops.h>
 #endif
-#if BUILD_HIP
+#if BUILD_ROCM
 #include <ops.hiph>
 #endif
 #include <cpu_ops.h>
@@ -21,7 +21,7 @@
 //                               UNMANGLED CALLS
 //===================================================================================
 
-#if BUILD_CUDA || defined(BUILD_HIP)
+#if BUILD_CUDA || defined(BUILD_ROCM)
 void estimateQuantiles_fp32(float *A, float *code, float offset, int n){ estimateQuantiles<float>(A, code, offset, n); }
 void estimateQuantiles_fp16(half *A, float *code, float offset, int n){ estimateQuantiles<half>(A, code, offset, n); }
 
@@ -171,7 +171,7 @@ void spmm_coo_very_sparse_naive_int8(int *max_count, int *max_idx, int *offset_r
 
 extern "C"
 {
-#if BUILD_CUDA || defined(BUILD_HIP)
+#if BUILD_CUDA || defined(BUILD_ROCM)
 	void cestimate_quantiles_fp32(float *A, float *code, float offset, int n){ estimateQuantiles_fp32(A, code, offset, n); }
 	void cestimate_quantiles_fp16(half *A, float *code, float offset, int n){ estimateQuantiles_fp16(A, code, offset, n); }
 	void cquantize(float *code, float *A, unsigned char *out, int n){ quantize(code, A, out, n); }
