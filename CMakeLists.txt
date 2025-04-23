@@ -201,7 +201,7 @@ elseif(BUILD_ROCM)
     find_package(hipblas REQUIRED)
     find_package(rocblas REQUIRED)
     find_package(hiprand REQUIRED)
-    
+
     # 检测 HIP Compiler（hipcc）版本
     execute_process(
         COMMAND ${HIP_HIPCC_EXECUTABLE} --version
@@ -222,8 +222,6 @@ elseif(BUILD_ROCM)
     set(ROCM_ARCH "gfx900;gfx902;gfx906;gfx908;gfx90a;gfx940;gfx941;gfx942;gfx1030;gfx1100;gfx1101" CACHE STRING "Target ROCm GPU architecture")
     set(HIP_HIPCC_FLAGS "${HIP_HIPCC_FLAGS} --amdgpu-target=${ROCM_ARCH} -O3 -ffast-math")
     add_compile_definitions(BUILD_ROCM)
-
-    include_directories(${HIP_INCLUDE_DIRS} "${ROCM_PATH}/include")
 
     # 最终输出构建目标名称后缀
     string(APPEND BNB_OUTPUT_NAME "_rocm${HIP_VERSION_SHORT}")
@@ -262,7 +260,7 @@ if(BUILD_MPS)
     target_link_libraries(bitsandbytes objc "-framework Foundation" "-framework Metal" "-framework MetalPerformanceShaders" "-framework MetalPerformanceShadersGraph")
 endif()
 if(BUILD_ROCM)
-    target_include_directories(bitsandbytes PUBLIC ${HIP_INCLUDE_DIRS})
+    target_include_directories(bitsandbytes PUBLIC ${HIP_INCLUDE_DIRS} "${ROCM_PATH}/include")
     target_link_libraries(bitsandbytes PUBLIC roc::hipblas hip::hiprand roc::rocblas)
     set_target_properties(bitsandbytes PROPERTIES HIP_SEPARABLE_COMPILATION ON)
 endif()
