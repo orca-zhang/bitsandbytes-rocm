@@ -214,6 +214,8 @@ elseif(BUILD_ROCM)
     set(HIP_HIPCC_FLAGS "${HIP_HIPCC_FLAGS} --amdgpu-target=${ROCM_ARCH} -O3 -ffast-math")
     add_compile_definitions(BUILD_ROCM)
 
+    include_directories(${HIP_INCLUDE_DIRS} "${ROCM_PATH}/include")
+
     # 最终输出构建目标名称后缀
     string(APPEND BNB_OUTPUT_NAME "_rocm${HIP_VERSION_SHORT}")
     message(STATUS "Using ROCm architecture: ${ROCM_ARCH}")
