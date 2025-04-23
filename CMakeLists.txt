@@ -25,6 +25,7 @@ endif()
 # Define included source files
 set(CPP_FILES csrc/common.cpp csrc/cpu_ops.cpp csrc/pythonInterface.cpp)
 set(CUDA_FILES csrc/ops.cu csrc/kernels.cu)
+set(ROCM_FILES csrc/ops.hip csrc/kernels.hip)
 set(MPS_FILES csrc/mps_ops.mm)
 set(METAL_FILES csrc/mps_kernels.metal)
 # C++ sources are always included
@@ -223,6 +224,8 @@ elseif(BUILD_ROCM)
     set(HIP_HIPCC_FLAGS "${HIP_HIPCC_FLAGS} --amdgpu-target=${ROCM_ARCH} -O3 -ffast-math")
     add_compile_definitions(BUILD_ROCM)
 
+    list(APPEND SRC_FILES ${ROCM_FILES})
+
     # 最终输出构建目标名称后缀
     string(APPEND BNB_OUTPUT_NAME "_rocm${HIP_VERSION_SHORT}")
     message(STATUS "Using ROCm architecture: ${ROCM_ARCH}")
@@ -246,7 +249,6 @@ add_library(bitsandbytes SHARED ${SRC_FILES})
 target_compile_features(bitsandbytes PUBLIC cxx_std_14)
 target_include_directories(bitsandbytes PUBLIC csrc include)
 
-
 if(BUILD_CUDA)
     target_include_directories(bitsandbytes PUBLIC ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
     target_link_libraries(bitsandbytes PUBLIC CUDA::cudart CUDA::cublas CUDA::cublasLt CUDA::cusparse)
@@ -260,7 +262,7 @@ if(BUILD_MPS)
     target_link_libraries(bitsandbytes objc "-framework Foundation" "-framework Metal" "-framework MetalPerformanceShaders" "-framework MetalPerformanceShadersGraph")
 endif()
 if(BUILD_ROCM)
-    target_include_directories(bitsandbytes PUBLIC ${HIP_INCLUDE_DIRS} "${ROCM_PATH}/include")
+    target_include_directories(bitsandbytes PUBLIC ${HIP_INCLUDE_DIRS})
     target_link_libraries(bitsandbytes PUBLIC roc::hipblas hip::hiprand roc::rocblas)
     set_target_properties(bitsandbytes PROPERTIES HIP_SEPARABLE_COMPILATION ON)
 endif()
